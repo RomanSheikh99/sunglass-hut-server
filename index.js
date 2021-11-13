@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 require('dotenv').config();
 const { MongoClient } = require('mongodb');
+const ObjectId = require('mongodb').ObjectID;
 
 const port = process.env.PORT || 5000;
 
@@ -24,11 +25,20 @@ async function run() {
     const ProductsCollection = database.collection('products');
     const bookingCollection = database.collection('booking');
     const reviewCollection = database.collection('review');
+    const adminCollection = database.collection('admin');
 
     //add product
     app.post('/addProduct', async (req, res) => {
       const product = req.body;
       const result = await ProductsCollection.insertOne(product);
+      res.json(result);
+    });
+
+
+    //Make Admin
+    app.post('/makeAdmin', async (req, res) => {
+      const admin = req.body;
+      const result = await adminCollection.insertOne(admin);
       res.json(result);
     });
 
@@ -44,6 +54,13 @@ async function run() {
       const cursor = ProductsCollection.find({});
       const products = await cursor.toArray();
       res.send(products);
+    });
+
+    // GET Admin
+    app.get('/admins', async (req, res) => {
+      const cursor = adminCollection.find({});
+      const admins = await cursor.toArray();
+      res.send(admins);
     });
 
     //Get Reviews
@@ -80,6 +97,14 @@ async function run() {
     app.delete('/deleteBooking/:id', async (req, res) => {
       const id = req.params.id;
       const result = await bookingCollection.deleteOne({ _id: id });
+      res.send(result);
+    });
+
+
+    //delete product
+    app.delete('/deleteProduct/:id', async (req, res) => {
+      const id = req.params.id;
+      const result = await ProductsCollection.deleteOne({ _id: ObjectId(id) });
       res.send(result);
     });
 
